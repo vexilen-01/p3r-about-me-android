@@ -1,0 +1,80 @@
+package com.example.p3rprofile.ui.components
+
+import android.net.Uri
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.annotation.OptIn
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
+
+@OptIn(UnstableApi::class)
+@Composable
+fun P3RBackgroundVideo(
+    videoUrl: String = "https://persona-3-reload-about-me-website-beta.vercel.app/p3-menu-bg.mp4",
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.fromUri(Uri.parse(videoUrl))
+            setMediaItem(mediaItem)
+            repeatMode = Player.REPEAT_MODE_ALL
+            volume = 0f // Muted so background music plays cleanly
+            playWhenReady = true
+            prepare()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        // Video Layer
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    player = exoPlayer
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    layoutParams = FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // P3R Midnight Blue Gradient Overlay (Directly matching your website's CSS mix-blend)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xCC000D2B), // #000d2b / 80%
+                            Color(0x66003DA6), // #003da6 / 40%
+                            Color(0xE6000A26)  // #000a26 / 90%
+                        )
+                    )
+                )
+        )
+    }
+}

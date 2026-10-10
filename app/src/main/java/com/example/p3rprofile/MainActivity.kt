@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
                     .background(P3RColors.SiteDeepBlack)
                     .safeDrawingPadding()
             ) {
+                // Looping Persona 3 Reload Background Video (Direct from your website)
+                com.example.p3rprofile.ui.components.P3RBackgroundVideo()
+
                 Column(modifier = Modifier.fillMaxSize()) {
                     P3RNavigationBar(
                         currentTab = currentTab,
