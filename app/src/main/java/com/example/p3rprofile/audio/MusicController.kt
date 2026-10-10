@@ -3,10 +3,9 @@ package com.example.p3rprofile.audio
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 
 data class Track(
     val id: String,
@@ -61,11 +60,11 @@ object MusicController {
         )
     )
 
-    var currentTrackIndex by mutableIntStateOf(0)
-        private set
+    private val _currentTrackIndex = mutableIntStateOf(0)
+    val currentTrackIndex: Int get() = _currentTrackIndex.intValue
 
-    var isPlaying by mutableStateOf(false)
-        private set
+    private val _isPlaying = mutableStateOf(false)
+    val isPlaying: Boolean get() = _isPlaying.value
 
     val currentTrack: Track
         get() = playlist[currentTrackIndex]
@@ -80,7 +79,7 @@ object MusicController {
     }
 
     private fun prepareTrack(index: Int, autoPlay: Boolean) {
-        currentTrackIndex = index
+        _currentTrackIndex.intValue = index
         isPrepared = false
 
         mediaPlayer?.let {
@@ -104,14 +103,14 @@ object MusicController {
                     isPrepared = true
                     if (autoPlay) {
                         mp.start()
-                        isPlaying = true
+                        _isPlaying.value = true
                     }
                 }
                 setOnCompletionListener {
                     nextTrack()
                 }
                 setOnErrorListener { _, _, _ ->
-                    isPlaying = false
+                    _isPlaying.value = false
                     isPrepared = false
                     true
                 }
@@ -127,10 +126,10 @@ object MusicController {
         if (isPrepared) {
             if (player.isPlaying) {
                 player.pause()
-                isPlaying = false
+                _isPlaying.value = false
             } else {
                 player.start()
-                isPlaying = true
+                _isPlaying.value = true
             }
         } else {
             prepareTrack(currentTrackIndex, autoPlay = true)
@@ -156,6 +155,6 @@ object MusicController {
         }
         mediaPlayer = null
         isPrepared = false
-        isPlaying = false
+        _isPlaying.value = false
     }
 }
