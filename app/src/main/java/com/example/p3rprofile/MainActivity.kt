@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.example.p3rprofile.audio.MusicController
 import com.example.p3rprofile.ui.components.P3RNavigationBar
 import com.example.p3rprofile.ui.components.P3RTab
 import com.example.p3rprofile.ui.screens.*
@@ -20,6 +21,10 @@ import com.example.p3rprofile.ui.theme.P3RColors
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize background music playback across the app (matches webpage behavior)
+        MusicController.initPlayer(this, autoPlay = true)
+
         setContent {
             var currentTab by remember { mutableStateOf(P3RTab.ABOUT) }
 
@@ -62,5 +67,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MusicController.release()
     }
 }

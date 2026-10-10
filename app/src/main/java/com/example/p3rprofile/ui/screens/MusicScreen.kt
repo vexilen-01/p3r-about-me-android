@@ -29,24 +29,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.p3rprofile.audio.MusicController
+import com.example.p3rprofile.ui.components.p3rSkew
 import com.example.p3rprofile.ui.theme.P3RColors
 
-data class Track(val title: String, val album: String, val artist: String)
 data class Artist(val name: String, val imgUrl: String)
 
 @Composable
 fun MusicScreen() {
-    val tracks = listOf(
-        Track("Color Your Night", "Persona 3 Reload Original ...", "Lotus Juice, Azumi Takahashi"),
-        Track("Full Moon Full Life", "Persona 3 Reload Original ...", "Azumi Takahashi, Lotus Juice"),
-        Track("Mass Destruction (-Reload-)", "Persona 3 Reload Original ...", "Lotus Juice, Azumi Takahashi"),
-        Track("It's Going Down Now", "Persona 3 Reload Original ...", "Lotus Juice, Azumi Takahashi"),
-        Track("When The Moon's Reaching Out Stars", "Persona 3 Reload Original ...", "Azumi Takahashi, Lotus Juice")
-    )
-
-    var trackIndex by remember { mutableIntStateOf(0) }
-    var isPlaying by remember { mutableStateOf(false) }
-    val currentTrack = tracks[trackIndex]
+    val currentTrack = MusicController.currentTrack
+    val isPlaying = MusicController.isPlaying
+    val trackIndex = MusicController.currentTrackIndex
+    val totalTracks = MusicController.playlist.size
 
     val artists = listOf(
         Artist("Joji", "https://persona-3-reload-about-me-website-beta.vercel.app/joji.jpg"),
@@ -63,6 +57,18 @@ fun MusicScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Title
+        Text(
+            text = "MUSIC CORNER",
+            color = Color.White,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Black,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier
+                .align(Alignment.Start)
+                .p3rSkew(-4f)
+        )
+
         Spacer(modifier = Modifier.height(20.dp))
 
         // --- P3R PORTABLE MP3 PLAYER CONTAINER ---
@@ -75,15 +81,12 @@ fun MusicScreen() {
             // White Earphone Cable Canvas Overlay (Curving across the player)
             Canvas(modifier = Modifier.matchParentSize().padding(horizontal = 4.dp)) {
                 val cordPath = Path().apply {
-                    // Start at left headphone plug
                     moveTo(size.width * 0.12f, size.height * 0.5f)
-                    // Curve downwards under player
                     cubicTo(
                         size.width * 0.12f, size.height * 1.05f,
                         size.width * 0.45f, size.height * 1.02f,
                         size.width * 0.88f, size.height * 0.65f
                     )
-                    // Curve up to earbuds
                     cubicTo(
                         size.width * 0.95f, size.height * 0.25f,
                         size.width * 0.80f, -size.height * 0.15f,
@@ -168,10 +171,11 @@ fun MusicScreen() {
                                     color = P3RColors.ElectricCyan,
                                     fontSize = 9.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    maxLines = 1
+                                    maxLines = 1,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
                                 Text(
-                                    text = "[${trackIndex + 1}/${tracks.size}]",
+                                    text = "[${trackIndex + 1}/$totalTracks]",
                                     color = P3RColors.ElectricCyan,
                                     fontSize = 9.sp,
                                     fontFamily = FontFamily.Monospace
@@ -224,7 +228,7 @@ fun MusicScreen() {
                             fontWeight = FontWeight.Black,
                             modifier = Modifier
                                 .clickable {
-                                    trackIndex = (trackIndex - 1 + tracks.size) % tracks.size
+                                    MusicController.prevTrack()
                                 }
                                 .padding(4.dp)
                         )
@@ -239,7 +243,9 @@ fun MusicScreen() {
                                     else Brush.radialGradient(listOf(Color(0xFFE2E8F0), Color(0xFF94A3B8)))
                                 )
                                 .border(1.5.dp, Color.White, CircleShape)
-                                .clickable { isPlaying = !isPlaying },
+                                .clickable {
+                                    MusicController.togglePlay()
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -258,7 +264,7 @@ fun MusicScreen() {
                             fontWeight = FontWeight.Black,
                             modifier = Modifier
                                 .clickable {
-                                    trackIndex = (trackIndex + 1) % tracks.size
+                                    MusicController.nextTrack()
                                 }
                                 .padding(4.dp)
                         )
@@ -302,7 +308,6 @@ fun MusicScreen() {
                                 .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.2f))
                                 .padding(vertical = 10.dp, horizontal = 2.dp)
                         ) {
-                            // Avatar Image with Cyan Ring
                             Box(
                                 modifier = Modifier
                                     .size(46.dp)
