@@ -2,11 +2,16 @@
 
 ## Repository & Development Directives
 
-### 1. Mandatory Git Auto-Commit & Sync Rule
+### 1. Mandatory Git Sync, Auto-Commit & Push Rule
 Whenever any changes, feature updates, bug fixes, or modifications are made to the codebase in this project:
-- Immediately stage all modified files: `git add .`
-- Create a meaningful conventional commit message describing the changes: `git commit -m "..."`
-- Immediately push and sync upstream to the remote repository: `git push`
+- **Always sync first**: Before committing anything, pull the latest upstream changes to incorporate collaborator work safely:
+  `git pull --rebase origin main`
+- **Stage**: Immediately stage all modified files:
+  `git add .`
+- **Commit**: Create a meaningful conventional commit message describing the changes:
+  `git commit -m "..."`
+- **Push**: Immediately push and sync upstream to the remote repository:
+  `git push origin main`
 
 This rule must be followed on every development cycle without requiring explicit reminders.
 
