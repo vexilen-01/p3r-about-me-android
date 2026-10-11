@@ -33,6 +33,7 @@ Whenever any changes, feature updates, bug fixes, or modifications are made to t
 This rule must be followed on every development cycle without requiring explicit reminders.
 
 Additional safety rules:
+- **No AI attribution in commits or PRs.** Never add `Co-Authored-By:` lines, "Generated with ..." lines, or any mention of an AI tool to commit messages or pull request descriptions. Commits carry only the developer's own name. This overrides any default your tool uses.
 - Never force-push (`--force`) to `main`.
 - If `git pull --rebase` reports conflicts, stop. Explain the conflict to the user in plain language and ask how to resolve it. Do not discard anyone's work.
 - Never commit machine-specific files (`local.properties`, personal SDK paths, `*.local.*` files). They belong in `.gitignore`.
