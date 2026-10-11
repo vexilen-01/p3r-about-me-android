@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.p3rprofile.ui.components.P3RCard
 import com.example.p3rprofile.ui.theme.P3RColors
 
 data class GameEntry(
@@ -75,13 +76,7 @@ fun GamesScreen() {
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         games.forEach { game ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF020B18).copy(alpha = 0.9f))
-                    .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.5f))
-                    .padding(12.dp)
-            ) {
+            P3RCard(background = P3RColors.GameCardNavy, borderAlpha = 0.5f) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
@@ -151,7 +146,7 @@ fun GamesScreen() {
 
                         Text(
                             text = game.note,
-                            color = Color(0xFFD1D5DB),
+                            color = P3RColors.NoteGray,
                             fontSize = 11.sp,
                             fontStyle = FontStyle.Italic,
                             lineHeight = 15.sp

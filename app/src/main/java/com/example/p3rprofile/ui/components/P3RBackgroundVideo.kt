@@ -22,6 +22,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.example.p3rprofile.ui.theme.P3RColors
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -83,9 +84,9 @@ fun P3RBackgroundVideo(
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            Color(0xCC000D2B), // #000d2b / 80%
-                            Color(0x66003DA6), // #003da6 / 40%
-                            Color(0xE6000A26)  // #000a26 / 90%
+                            P3RColors.VideoTintStart, // #000d2b / 80%
+                            P3RColors.VideoTintMid, // #003da6 / 40%
+                            P3RColors.VideoTintEnd  // #000a26 / 90%
                         )
                     )
                 )

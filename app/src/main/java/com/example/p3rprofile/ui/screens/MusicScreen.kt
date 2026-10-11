@@ -31,7 +31,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import com.example.p3rprofile.audio.MusicController
-import com.example.p3rprofile.ui.components.p3rSkew
+import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
 data class Artist(val name: String, val imgUrl: String)
@@ -72,15 +73,9 @@ fun MusicScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Title
-        Text(
+        P3RSectionTitle(
             text = "MUSIC CORNER",
-            color = Color.White,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier
-                .align(Alignment.Start)
-                .p3rSkew(-4f)
+            modifier = Modifier.align(Alignment.Start)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -128,7 +123,7 @@ fun MusicScreen() {
                     .clip(RoundedCornerShape(50.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFFE6EFFF), Color(0xFFFFFFFF), Color(0xFFC0D4FF))
+                            listOf(P3RColors.PlayerShellLight, Color(0xFFFFFFFF), P3RColors.PlayerShellBlue)
                         )
                     )
                     .border(2.5.dp, Color.White, RoundedCornerShape(50.dp))
@@ -143,8 +138,8 @@ fun MusicScreen() {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFCBD5E1))
-                            .border(2.dp, Color(0xFF94A3B8), CircleShape),
+                            .background(P3RColors.PlayerSteel)
+                            .border(2.dp, P3RColors.PlayerSteelDark, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         // Album cover fills the disc; the ring and dot on top make it look like a CD.
@@ -159,7 +154,7 @@ fun MusicScreen() {
                                 .size(14.dp)
                                 .clip(CircleShape)
                                 .background(Color.White)
-                                .border(1.dp, Color(0xFFCBD5E1), CircleShape),
+                                .border(1.dp, P3RColors.PlayerSteel, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Box(
@@ -178,7 +173,7 @@ fun MusicScreen() {
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFF051124))
+                            .background(P3RColors.PlayerScreen)
                             .border(1.dp, P3RColors.ElectricCyan.copy(alpha = 0.7f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 10.dp, vertical = 8.dp)
                     ) {
@@ -267,7 +262,7 @@ fun MusicScreen() {
                         // Previous
                         Text(
                             text = "◁❚",
-                            color = Color(0xFF475569),
+                            color = P3RColors.PlayerIconGray,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
                             modifier = Modifier
@@ -284,7 +279,7 @@ fun MusicScreen() {
                                 .clip(CircleShape)
                                 .background(
                                     if (isPlaying) Brush.radialGradient(listOf(P3RColors.ElectricCyan, P3RColors.OceanBlue))
-                                    else Brush.radialGradient(listOf(Color(0xFFE2E8F0), Color(0xFF94A3B8)))
+                                    else Brush.radialGradient(listOf(P3RColors.PlayerButtonLight, P3RColors.PlayerSteelDark))
                                 )
                                 .border(1.5.dp, Color.White, CircleShape)
                                 .clickable {
@@ -294,7 +289,7 @@ fun MusicScreen() {
                         ) {
                             Text(
                                 text = if (isPlaying) "❚❚" else "▶",
-                                color = if (isPlaying) Color.White else Color(0xFF1E293B),
+                                color = if (isPlaying) Color.White else P3RColors.PlayerIconDark,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black
                             )
@@ -303,7 +298,7 @@ fun MusicScreen() {
                         // Next
                         Text(
                             text = "❚▷",
-                            color = Color(0xFF475569),
+                            color = P3RColors.PlayerIconGray,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
                             modifier = Modifier
@@ -320,12 +315,11 @@ fun MusicScreen() {
         Spacer(modifier = Modifier.height(28.dp))
 
         // --- FAVORITE ARTISTS CARD DECK ---
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF010816).copy(alpha = 0.85f))
-                .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.5f))
-                .padding(14.dp)
+        P3RCard(
+            background = P3RColors.SiteDeepBlack,
+            backgroundAlpha = 0.85f,
+            borderAlpha = 0.5f,
+            contentPadding = 14.dp
         ) {
             Column {
                 Text(
@@ -348,7 +342,7 @@ fun MusicScreen() {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .weight(1f)
-                                .background(Color(0xFF020713))
+                                .background(P3RColors.MidnightBlack)
                                 .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.2f))
                                 .padding(vertical = 10.dp, horizontal = 2.dp)
                         ) {

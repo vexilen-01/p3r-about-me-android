@@ -19,7 +19,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.p3rprofile.ui.components.p3rSkew
+import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
 data class PersonalityMeter(val label: String, val value: Int, val max: Int = 100)
@@ -44,14 +45,7 @@ fun PersonalityScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(
-            text = "PERSONALITY METERS",
-            color = Color.White,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier.p3rSkew(-4f)
-        )
+        P3RSectionTitle("PERSONALITY METERS")
 
         stats.forEach { stat ->
             PersonalityMeterBar(stat = stat)
@@ -69,13 +63,7 @@ fun PersonalityMeterBar(stat: PersonalityMeter) {
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(P3RColors.SiteDarkNavy.copy(alpha = 0.9f))
-            .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.4f))
-            .padding(12.dp)
-    ) {
+    P3RCard {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -95,7 +83,7 @@ fun PersonalityMeterBar(stat: PersonalityMeter) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(12.dp)
-                    .background(Color(0xFF02060D))
+                    .background(P3RColors.MeterTrack)
                     .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.5f))
             ) {
                 // Gradient Fill

@@ -29,4 +29,24 @@ object P3RColors {
     val VelvetIndigo    = Color(0xFF0B0D26)
     val VelvetPurple    = Color(0xFF1E1035)
     val TextDark        = Color(0xFF050B1A)
+
+    // Panels and text on screens
+    val GameCardNavy    = Color(0xFF020B18)
+    val MeterTrack      = Color(0xFF02060D)
+    val NoteGray        = Color(0xFFD1D5DB)
+
+    // Background video tint (gradient left, middle, right)
+    val VideoTintStart  = Color(0xCC000D2B)
+    val VideoTintMid    = Color(0x66003DA6)
+    val VideoTintEnd    = Color(0xE6000A26)
+
+    // Metallic portable music player on the Music tab
+    val PlayerShellLight = Color(0xFFE6EFFF)
+    val PlayerShellBlue  = Color(0xFFC0D4FF)
+    val PlayerSteel      = Color(0xFFCBD5E1)
+    val PlayerSteelDark  = Color(0xFF94A3B8)
+    val PlayerScreen     = Color(0xFF051124)
+    val PlayerIconGray   = Color(0xFF475569)
+    val PlayerButtonLight = Color(0xFFE2E8F0)
+    val PlayerIconDark   = Color(0xFF1E293B)
 }

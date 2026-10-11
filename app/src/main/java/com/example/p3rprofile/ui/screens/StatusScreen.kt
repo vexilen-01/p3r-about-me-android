@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.p3rprofile.ui.components.p3rSkew
+import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
 @Composable
@@ -26,15 +26,10 @@ fun AboutMeScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Section Header matching website
-        Text(
+        P3RSectionTitle(
             text = "ABOUT ME",
-            color = Color.White,
             fontSize = 32.sp,
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier
-                .p3rSkew(-4f)
-                .padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
         // Card 1: NAME & ROLE

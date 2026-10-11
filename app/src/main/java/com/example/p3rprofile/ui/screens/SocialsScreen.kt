@@ -17,7 +17,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.p3rprofile.ui.components.p3rSkew
+import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
 data class SocialItem(val name: String, val category: String, val desc: String, val link: String)
@@ -38,26 +39,15 @@ fun SocialsScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text(
-            text = "SOCIAL MEDIA",
-            color = Color.White,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier.p3rSkew(-4f)
-        )
+        P3RSectionTitle("SOCIAL MEDIA")
 
         socials.forEach { item ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(P3RColors.SiteDarkNavy.copy(alpha = 0.9f))
-                    .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.4f))
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
-                        context.startActivity(intent)
-                    }
-                    .padding(14.dp)
+            P3RCard(
+                contentPadding = 14.dp,
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
+                    context.startActivity(intent)
+                }
             ) {
                 Column {
                     Row(

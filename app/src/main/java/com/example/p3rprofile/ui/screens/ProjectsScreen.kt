@@ -17,7 +17,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.p3rprofile.ui.components.p3rSkew
+import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
 @Composable
@@ -32,23 +33,10 @@ fun ProjectsScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "PROJECTS & MISSIONS",
-            color = Color.White,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Black,
-            fontStyle = FontStyle.Italic,
-            modifier = Modifier.p3rSkew(-4f)
-        )
+        P3RSectionTitle("PROJECTS & MISSIONS")
 
         // Project Card
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(P3RColors.SiteDarkNavy.copy(alpha = 0.95f))
-                .border(1.dp, P3RColors.OceanBlue.copy(alpha = 0.4f))
-                .padding(16.dp)
-        ) {
+        P3RCard(backgroundAlpha = 0.95f, contentPadding = 16.dp) {
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -91,7 +79,7 @@ fun ProjectsScreen() {
                             color = Color.Gray,
                             fontSize = 10.sp,
                             modifier = Modifier
-                                .background(Color(0xFF02060D))
+                                .background(P3RColors.MeterTrack)
                                 .border(1.dp, Color.DarkGray)
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         )

@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.example.p3rprofile.audio.MusicController
+import com.example.p3rprofile.ui.components.P3RBackgroundVideo
 import com.example.p3rprofile.ui.components.P3RNavigationBar
 import com.example.p3rprofile.ui.components.P3RTab
 import com.example.p3rprofile.ui.screens.*
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     .safeDrawingPadding()
             ) {
                 // Looping Persona 3 Reload Background Video (Direct from your website)
-                com.example.p3rprofile.ui.components.P3RBackgroundVideo()
+                P3RBackgroundVideo()
 
                 Column(modifier = Modifier.fillMaxSize()) {
                     P3RNavigationBar(
