@@ -10,11 +10,13 @@ Source root: `app/src/main/java/com/example/p3rprofile/`
 
 | File | What it does |
 |---|---|
-| `MainActivity.kt` | Only activity. Starts music, draws background video, tab bar, and the screen for the selected tab. `onDestroy` releases music. |
-| `audio/MusicController.kt` | Singleton `object` wrapping `MediaPlayer`. Holds the 5-track playlist (audio + cover URLs), play/pause/next/prev. |
+| `MainActivity.kt` | Only activity. Starts music, draws background video, tab bar, and the screen for the selected tab. Pauses/resumes music in `onStop`/`onStart`; `onDestroy` releases music only when the app is really closing. |
+| `audio/MusicController.kt` | Singleton `object` wrapping an ExoPlayer. Holds the 5-track playlist (audio + cover URLs), play/pause/next/prev, loading/error state, progress. Pauses when the app is hidden. |
 | `ui/components/P3RBackgroundVideo.kt` | Looping muted ExoPlayer video behind everything, plus a dark gradient overlay. |
 | `ui/components/P3RNavigationBar.kt` | `enum P3RTab` (ABOUT, STATS, PROJECTS, GAMES, MUSIC, SOCIALS) and the slanted tab bar. |
-| `ui/components/P3RShapes.kt` | `AngledBannerShape` (works) and `Modifier.p3rSkew` (currently does nothing, known bug). |
+| `ui/components/P3RShapes.kt` | `AngledBannerShape` and `Modifier.p3rSkew` (slants everything drawn after it in the modifier chain). |
+| `ui/components/P3RCard.kt` | `P3RCard` (the navy bordered panel) and `P3RSectionTitle` (big italic page heading). Use these instead of copying the Box/Text code. |
+| `ui/components/P3RImage.kt` | `P3RImage`: remote image with a loading tile and a "!" tile when offline. Use it instead of raw `AsyncImage`. |
 | `ui/components/PentagonStatChart.kt` | Canvas pentagon stat chart. Built but **not used on any screen yet** (the website has no such chart). Kept on purpose for later use. Does not draw its labels. |
 | `ui/screens/StatusScreen.kt` | ABOUT tab: `AboutMeScreen` and `AboutCard`. |
 | `ui/screens/PersonalityScreen.kt` | STATS tab: pentagon chart and `PersonalityMeterBar`. |
@@ -27,11 +29,11 @@ Source root: `app/src/main/java/com/example/p3rprofile/`
 
 ## How a tab works
 
-`MainActivity` keeps `currentTab` in `remember`. Picking a tab in `P3RNavigationBar` swaps the screen inside `AnimatedContent` (horizontal slide). To add a tab: add it to `enum P3RTab`, then add a branch in the `when (target)` in `MainActivity.kt`, then create `ui/screens/<Name>Screen.kt`.
+`MainActivity` keeps `currentTab` in `rememberSaveable`. Picking a tab in `P3RNavigationBar` swaps the screen inside `AnimatedContent` (horizontal slide). To add a tab: add it to `enum P3RTab`, then add a branch in the `when (target)` in `MainActivity.kt`, then create `ui/screens/<Name>Screen.kt`.
 
 ## Style rules for any new UI
 
-- Colours only from `P3RColors` (background `SiteDeepBlack`, accent `ElectricCyan`, highlight `NeonRedPink`/`HotOrange`). No hardcoded hex, no purple.
+- Colours only from `P3RColors` (background `SiteDeepBlack`, accent `ElectricCyan`, highlight `NeonRedPink`/`HotOrange`). No hardcoded hex (add new colours to `P3RColors`), no purple.
 - Sharp, angular shapes (`AngledBannerShape`). No rounded Material look.
 - Text should look slanted (-8° to -12°) with a hard drop shadow.
 - Screens are transparent so the background video shows through.
@@ -39,6 +41,8 @@ Source root: `app/src/main/java/com/example/p3rprofile/`
 ## Build and tools
 
 - Gradle with version catalog `gradle/libs.versions.toml`. App module: `app/build.gradle.kts`.
-- Image loading: Coil. Video: Media3 ExoPlayer. Audio: Android `MediaPlayer`.
+- Image loading: Coil 3 (3.4.0; 3.5+ needs a newer Kotlin than this project). Video and audio: Media3 ExoPlayer.
+- Dependencies live in `gradle/libs.versions.toml`. Do not hardcode versions in `app/build.gradle.kts`.
+- Tests: `app/src/test` (unit) and `app/src/androidTest` (launch smoke test).
 - Test on the emulator with `scripts/run-emulator.ps1` (see `AGENTS.md` section 4).
 - Application id is the placeholder `com.example.p3rprofile`.

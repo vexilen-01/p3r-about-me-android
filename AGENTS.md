@@ -116,17 +116,31 @@ Rules for agents:
 - Mark open items `PENDING FOR YOU`. When one is done, change it to `DONE (who, date)` instead of deleting it.
 - Write in plain language for a beginner.
 
+#### 2026-10-11 (later), tariqaq: big cleanup, all pushed
+Plain summary for @vexilen-01. Nothing here changes how the app looks overall, it fixes bugs and makes it sturdier.
+- **Fixed:** About Me cards were solid pink; now they have a thin pink stripe on the left.
+- **Fixed:** the slanted text. Tab labels now really lean (before only the tab shape did).
+- **Fixed:** music no longer restarts when the phone rotates, and the selected tab is kept on rotation.
+- **Fixed:** music and the background video now pause when you leave the app and resume when you come back.
+- **New:** the music player shows the album cover, a progress bar, and "LOADING" / "OFFLINE" messages.
+- **New:** with no internet, images show a small "!" tile and the background stays dark blue, instead of empty black boxes.
+- **Under the hood:** libraries updated, music now uses the same player as the video (ExoPlayer), shared `P3RCard` / `P3RSectionTitle` / `P3RImage` pieces, all colours moved into `P3RColors`, `.idea` folder no longer tracked (stops merge conflicts), real tests instead of template ones, a README with screenshots.
+- **Kept on purpose:** the unused purple theme files and `PentagonStatChart` (you may use them later).
+- **Good to know:** new UI should use `P3RCard`, `P3RSectionTitle`, `P3RImage` and `P3RColors`. See `docs/PROJECT_MAP.md`.
+- **If git complains after you pull** about `.idea`: delete your local `.idea` folder and pull again.
+- **Still open, ask Tariq first:** the placeholder package name `com.example.p3rprofile`, and an intro screen like the website has.
+
 #### 2026-10-11, tariqaq
 - **Access check:** Tariq confirmed he has WRITE permission on this repo. Commit, push and sync all work.
 - **Emulator setup on Tariq's laptop:** his Android SDK had been deleted. He reinstalled it, so he now tests on an Android Studio emulator (`Medium_Phone_API_36.1`). This is local to his machine. Section 4 above lets you do the same with one script run.
 - **New file:** `scripts/run-emulator.ps1`. One command boots the emulator, builds, installs and launches the app, and takes a screenshot. It works on any Windows machine with no editing: it finds the SDK and JDK, installs missing emulator pieces and creates an emulator if needed.
 - **AGENTS.md updated:** added the sync briefing (section 3), the emulator-first testing rule (section 4) and this log (section 5).
 - **PENDING FOR YOU: setup.** Next time you want to test the app, your agent will offer to set up the emulator so you no longer need your phone connected.
-- **PENDING FOR YOU: known issues found in a full project review.** None are fixed yet. Agree with Tariq on who fixes what, to avoid merge conflicts.
-  1. The `p3rSkew` modifier in `ui/components/P3RShapes.kt` builds a matrix but never applies it, so text does not actually slant. The tab ribbon does slant, because it uses `AngledBannerShape`.
-  2. The `AboutCard` in `ui/screens/StatusScreen.kt` renders solid pink. The 4dp accent stripe uses `matchParentSize()`, which overrides its width, so it covers the whole card. This is visible on the About Me tab.
-  3. Rotating the screen restarts the music, because `MainActivity.onDestroy` calls `MusicController.release()`.
-  4. Music and the background video keep playing when the app goes to the background, because nothing pauses them on `onStop`.
+- **Known issues found in a full project review.** Items 1, 2, 3, 4 and 6 are fixed (see the entry above). Still open: 5 (kept on purpose) and 7. Agree with Tariq before changing them.
+  1. **DONE (tariqaq, 2026-10-11)** The `p3rSkew` modifier in `ui/components/P3RShapes.kt` builds a matrix but never applies it, so text does not actually slant. The tab ribbon does slant, because it uses `AngledBannerShape`.
+  2. **DONE (tariqaq, 2026-10-11)** The `AboutCard` in `ui/screens/StatusScreen.kt` renders solid pink. The 4dp accent stripe uses `matchParentSize()`, which overrides its width, so it covers the whole card. This is visible on the About Me tab.
+  3. **DONE (tariqaq, 2026-10-11)** Rotating the screen restarts the music, because `MainActivity.onDestroy` calls `MusicController.release()`.
+  4. **DONE (tariqaq, 2026-10-11)** Music and the background video keep playing when the app goes to the background, because nothing pauses them on `onStop`.
   5. `ui/theme/Theme.kt` and `Type.kt` are unused template leftovers (the purple scheme), and `P3RProfileTheme` is not wrapped around `setContent`.
-  6. Several libraries are old (`coreKtx 1.10.1`, `activityCompose 1.8.0`, `lifecycle 2.6.1`, media3 `1.3.1`) compared with the Compose BOM `2026.02.01` and AGP `9.4.1`.
+  6. **DONE (tariqaq, 2026-10-11)** Several libraries are old (`coreKtx 1.10.1`, `activityCompose 1.8.0`, `lifecycle 2.6.1`, media3 `1.3.1`) compared with the Compose BOM `2026.02.01` and AGP `9.4.1`.
   7. The package name is still the placeholder `com.example.p3rprofile`, so the app cannot be published to the Play Store under that ID.
