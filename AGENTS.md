@@ -72,27 +72,27 @@ Tariq tests with an Android Studio emulator on his laptop. The goal is that no d
 - If the user says **yes**, run Step C and then write `test_target=emulator` to `.agent-local`.
 - If the user says **no**, write `test_target=phone` to `.agent-local` and continue with the phone.
 
-**Step C: one-time emulator setup (Windows).** Tell the user what you are doing as you go, because they may be new to this. Ask before starting any large download.
-1. **Android Studio** must be installed. If it is not, ask the user to install it from https://developer.android.com/studio. Do not try to install it silently.
-2. **Find the SDK** in this order: the `ANDROID_HOME` environment variable, `sdk.dir` in `local.properties`, `%LOCALAPPDATA%\Android\Sdk`, then Android Studio's setting (File > Settings > Languages & Frameworks > Android SDK). If the SDK folder is missing or empty, restore it with step 3. Make sure `local.properties` in the repo root contains `sdk.dir=<escaped SDK path>`. It is gitignored.
-3. **Install the packages** with `sdkmanager` (in `<SDK>\cmdline-tools\latest\bin`; get the "Command-line tools" zip from the SDK Manager in Android Studio if absent). Required packages:
-   - `platform-tools`
-   - `emulator`
-   - `platforms;android-37.0` (matches `compileSdk` in `app/build.gradle.kts`)
-   - `build-tools;37.0.0` (Gradle may also fetch `36.0.0` on its own, which is normal)
-   - `system-images;android-36.1;google_apis_playstore;x86_64`
+**Step C: set it up by running the script.** `scripts/run-emulator.ps1` does everything and has no machine-specific paths, so nobody has to edit it. It finds the Android SDK and JDK (environment variables, `local.properties`, the standard `%LOCALAPPDATA%\Android\Sdk`, Android Studio's bundled JDK), then:
+- downloads the Android command-line tools if they are missing,
+- installs `platform-tools`, `emulator` and the system image if they are missing (a one-time download of a few GB),
+- warns if hardware virtualization is off,
+- uses an existing healthy emulator (AVD), or creates one named `P3R_Emulator` if there is none,
+- boots it, builds and installs the app with `gradlew installDebug`, launches the app, and saves a screenshot.
 
-   Set `JAVA_HOME` to Android Studio's bundled JDK (`<Android Studio>\jbr`) when running `sdkmanager`. On Windows, `sdkmanager.bat` splits arguments at `;`, so wrap each package name in quotes inside `cmd /c`, for example: `cmd /c ""<SDK>\cmdline-tools\latest\bin\sdkmanager.bat" "platforms;android-37.0" "emulator""`
-4. **Check hardware acceleration:** `<SDK>\emulator\emulator.exe -accel-check`. It must report that WHPX, HAXM or another accelerator is usable. If not, tell the user to enable virtualization in BIOS and turn on "Windows Hypervisor Platform" in Windows Features.
-5. **Create the AVD** if `emulator.exe -list-avds` shows none that is healthy (it has a real data folder under `~\.android\avd`):
-   `avdmanager create avd -n Medium_Phone_API_36.1 -k "system-images;android-36.1;google_apis_playstore;x86_64" -d medium_phone`
-   Alternative for a beginner: Android Studio > Device Manager > Create Device > Medium Phone > API 36.1.
-6. **Launcher script:** `scripts/run-emulator.ps1` boots the AVD, waits for boot, runs `gradlew installDebug`, launches `com.example.p3rprofile/.MainActivity`, and saves a screenshot. It has **Tariq's SDK path and JDK path hardcoded**. Do not edit and commit it with your own paths, because that would break it for Tariq. Instead, copy it to `scripts/run-emulator.local.ps1` (add `*.local.ps1` to `.gitignore`), change `$sdk` and `JAVA_HOME` there, and use that copy.
-7. Run the local script once to confirm the app appears on the emulator, then record `test_target=emulator` in `.agent-local`.
+Run it like this: `powershell -ExecutionPolicy Bypass -File scripts\run-emulator.ps1`
+- `-SetupOnly` prepares everything without building or launching.
+- `-NoScreenshot` skips the screenshot.
+- `-Avd <name>` forces a specific emulator.
 
-**Every run after setup:** run the launcher script. It reuses a running emulator and only boots one if none is up. The first Gradle build is slow (about 5–10 minutes). Later builds are much faster. If more than one device is connected, target the emulator explicitly with `adb -s emulator-5554 ...`.
+Tell the user what is happening while it runs, because the first run is slow (large download, plus a first Gradle build of about 5–10 minutes). When it finishes, show the screenshot path it prints, then write `test_target=emulator` to `.agent-local`.
 
-If emulator setup fails and cannot be fixed, tell the user exactly what failed and fall back to the phone for that run. Do not silently switch targets.
+The only things the script cannot do for the user are installing a JDK or Android Studio (it stops and says so) and switching on virtualization in BIOS. If it prints a warning about virtualization, tell the user to enable virtualization in BIOS and turn on "Windows Hypervisor Platform" in Windows Features.
+
+**Every run after setup:** run the same script. It reuses a running emulator and boots one only if none is up. It sets `ANDROID_SERIAL`, so Gradle installs only on the emulator even when a real phone is plugged in. Later builds are much faster than the first.
+
+**Limits:** the script is Windows PowerShell only. On macOS or Linux, tell the user it is not supported there yet and use Android Studio's Device Manager instead.
+
+If the script fails and you cannot fix it, tell the user exactly what failed and fall back to the phone for that run. Do not silently switch targets.
 
 ### 5. Collaborator Activity Log (handoff notes)
 This section is how one developer tells the other, and their agent, what happened while they were away. Section 3 tells the agent to read it.
@@ -104,8 +104,8 @@ Rules for agents:
 
 #### 2026-10-11, tariqaq
 - **Access check:** Tariq confirmed he has WRITE permission on this repo. Commit, push and sync all work.
-- **Emulator setup on Tariq's laptop:** his Android SDK had been deleted. He reinstalled it, so he now tests on an Android Studio emulator (`Medium_Phone_API_36.1`). This is local to his machine and changes nothing for you, except that section 4 above now exists so you can do the same.
-- **New file:** `scripts/run-emulator.ps1` (commit `13a61a7`). It boots the emulator, installs and launches the app, and takes a screenshot. It has Tariq's paths hardcoded, so copy it to a `.local.ps1` file as described in section 4, step 6.
+- **Emulator setup on Tariq's laptop:** his Android SDK had been deleted. He reinstalled it, so he now tests on an Android Studio emulator (`Medium_Phone_API_36.1`). This is local to his machine. Section 4 above lets you do the same with one script run.
+- **New file:** `scripts/run-emulator.ps1`. One command boots the emulator, builds, installs and launches the app, and takes a screenshot. It works on any Windows machine with no editing: it finds the SDK and JDK, installs missing emulator pieces and creates an emulator if needed.
 - **AGENTS.md updated:** added the sync briefing (section 3), the emulator-first testing rule (section 4) and this log (section 5).
 - **PENDING FOR YOU: setup.** Next time you want to test the app, your agent will offer to set up the emulator so you no longer need your phone connected.
 - **PENDING FOR YOU: known issues found in a full project review.** None are fixed yet. Agree with Tariq on who fixes what, to avoid merge conflicts.
