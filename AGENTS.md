@@ -8,6 +8,15 @@ There are two developers:
 
 Either of them may have pushed since you last looked. Section 3 tells you how to check and what to report.
 
+## Quick Start: Testing Without a Real Phone
+
+**Nobody needs to plug in a real phone or turn on developer options to test this app.** There is a one-command Android emulator setup (section 4). Once it is set up, the user just says **"I wanna test the app"** (or "run it", "show me the app"), and the agent will:
+1. open the Android emulator (a virtual phone on the laptop),
+2. build and install the app on it,
+3. open the app on the emulator and show a screenshot.
+
+**Agents:** if the user has not set this up yet (no `test_target=emulator` in `.agent-local`), offer it **once**, early, in plain words: "You don't need your phone connected to test anymore. Want me to set up an Android emulator on your laptop? After that, just say 'I wanna test the app' and I'll open it for you." If they agree, do section 4. Never default to a physical phone once the emulator exists.
+
 ## Repository & Development Directives
 
 ### 1. Mandatory Git Sync, Auto-Commit & Push Rule
@@ -41,22 +50,24 @@ The first time the user asks you to add, change, fix or run anything in a sessio
 
 1. Fetch without changing the working tree: `git fetch origin`
 2. List what is new on the remote: `git log --format="%h | %an | %ar | %s" HEAD..origin/main`
-3. If there are new commits, also run `git diff --stat HEAD...origin/main`, and read the diff where needed to understand it.
-4. If nothing is new, say "Repo is up to date, nothing new from the other developer." in one line and continue.
-5. If something is new, tell the user before starting their task. Cover:
-   - **Who** pushed it (for example `tariqaq`) and when.
-   - **What** changed, in plain language a beginner can follow, not just commit titles.
-   - **Which files** were added, changed or removed.
-   - **What it means for the user**: new scripts to know about, new dependencies, setup steps they must do on their machine, anything that could conflict with what they are about to ask.
+3. If there are new commits, run `git diff --stat HEAD...origin/main` and skim the changes so you can summarize them accurately.
+4. If nothing is new, say "Up to date, nothing new from the other developer." in one line and continue.
+5. If something is new, give a **short** catch-up before starting the user's task:
+   - A one-line header: who pushed and how many changes (for example "tariqaq pushed 3 updates").
+   - **At most 4 bullets**, one short line each, plain words, no jargon. Group related commits into one bullet. Skip file names, commit hashes and code detail.
+   - One line for anything the user must do or watch out for (for example "Say 'yes' next time and I'll set up the emulator"). Omit it if there is nothing.
+   - End with: "Say 'details' if you want more." Only go deeper when asked.
 6. Then sync: `git pull --rebase origin main`. If the user has uncommitted work, commit it first. Never throw it away.
-7. Read the **Collaborator Activity Log** in section 5 and mention any entries marked `PENDING FOR YOU`.
+7. Read the **Collaborator Activity Log** in section 5. If anything is marked `PENDING FOR YOU`, add one line such as "2 things are waiting for you (say 'pending' to see them)". Do not list them unless asked.
+8. If `.agent-local` has no `test_target` yet, add the one-line emulator offer from the Quick Start section at the top, even when nothing new was pushed.
+9. Then carry on with what the user asked.
 
-Keep the briefing short and clear. Do not dump raw git output at the user.
+Keep it quick. The user wants to be caught up in about 10 seconds, not read a report. Never paste raw git output.
 
 ### 4. Testing the App: Use an Android Emulator, Not a Physical Phone
 Tariq tests with an Android Studio emulator on his laptop. The goal is that no developer has to keep a real phone plugged in with USB debugging on.
 
-**Trigger:** whenever you are about to run, install, or test the app on a device, or the user says things like "run it", "test it", "show me the app", or "see it on my phone".
+**Trigger:** whenever you are about to run, install, or test the app on a device, or the user says things like "I wanna test the app", "run it", "test it", "show me the app", or "see it on my phone". Once the emulator is set up, every one of these means: run `scripts/run-emulator.ps1` (the emulator opens and the app opens on it). Do not ask which device to use, and do not touch a connected phone.
 
 **Step A: check what is available.**
 - Run `adb devices` (`adb` lives in `<Android SDK>\platform-tools`).
@@ -65,14 +76,15 @@ Tariq tests with an Android Studio emulator on his laptop. The goal is that no d
   - If it contains `test_target=phone`, the user said no to the emulator. Use the phone, and do not ask again.
   - If the file has no preference, go to Step B.
 
-**Step B: ask once.** If the only target is a physical phone, or there is no device at all, stop before installing and ask the user something like this:
+**Step B: offer the emulator once.** If the only target is a physical phone, or there is no device at all, stop before installing and say something like this:
 
-> "Right now testing needs your real phone plugged in with developer options on. Tariq's setup uses an Android emulator on the laptop instead, so no phone or cable is needed. Want me to set that up for you? It is a one-time setup of roughly 3–5 GB of downloads, and after that I will run the app on the emulator by default."
+> "Good news: you don't need your real phone plugged in to test anymore. I can set up an Android emulator (a virtual phone) on your laptop. It's a one-time setup of a few GB of downloads. After that, whenever you say 'I wanna test the app', I'll open the emulator and the app for you. Want me to set it up?"
 
 - If the user says **yes**, run Step C and then write `test_target=emulator` to `.agent-local`.
-- If the user says **no**, write `test_target=phone` to `.agent-local` and continue with the phone.
+- If the user says **no**, write `test_target=phone` to `.agent-local` and continue with the phone. If they later say they want the emulator, run Step C.
 
-**Step C: set it up by running the script.** `scripts/run-emulator.ps1` does everything and has no machine-specific paths, so nobody has to edit it. It finds the Android SDK and JDK (environment variables, `local.properties`, the standard `%LOCALAPPDATA%\Android\Sdk`, Android Studio's bundled JDK), then:
+**Step C: set it up by running the script.** `scripts/run-emulator.ps1` does everything and has no machine-specific paths, so nobody has to edit it. It finds the Android SDK (environment variables, `local.properties`, the standard `%LOCALAPPDATA%\Android\Sdk`) and a JDK, then:
+- downloads a portable JDK if none is found,
 - downloads the Android command-line tools if they are missing,
 - installs `platform-tools`, `emulator` and the system image if they are missing (a one-time download of a few GB),
 - warns if hardware virtualization is off,
@@ -86,7 +98,7 @@ Run it like this: `powershell -ExecutionPolicy Bypass -File scripts\run-emulator
 
 Tell the user what is happening while it runs, because the first run is slow (large download, plus a first Gradle build of about 5–10 minutes). When it finishes, show the screenshot path it prints, then write `test_target=emulator` to `.agent-local`.
 
-The only things the script cannot do for the user are installing a JDK or Android Studio (it stops and says so) and switching on virtualization in BIOS. If it prints a warning about virtualization, tell the user to enable virtualization in BIOS and turn on "Windows Hypervisor Platform" in Windows Features.
+The user needs nothing pre-installed: no Android Studio, no JDK, no environment variables. The script downloads a portable JDK if none is found. The one thing it cannot do is switch on virtualization (it needs admin rights and a restart). If it prints a hardware-acceleration warning, walk the user through the fix it prints: run `Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All` in an Administrator PowerShell, restart Windows, then re-run the script. If that errors, enable virtualization in the BIOS first.
 
 **Every run after setup:** run the same script. It reuses a running emulator and boots one only if none is up. It sets `ANDROID_SERIAL`, so Gradle installs only on the emulator even when a real phone is plugged in. Later builds are much faster than the first.
 

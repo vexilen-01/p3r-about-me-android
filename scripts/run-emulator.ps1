@@ -39,6 +39,7 @@ $jdkCandidates = @(
     (Join-Path $env:ProgramFiles "Android\Android Studio\jbr"),
     (Join-Path $env:LOCALAPPDATA "Programs\Android Studio\jbr")
 )
+$jdkCandidates += @(Get-ChildItem (Join-Path $env:LOCALAPPDATA "P3R\jdk") -Directory -ErrorAction SilentlyContinue | ForEach-Object FullName)
 foreach ($p in $jdkCandidates) {
     if ($p -and (Test-Path (Join-Path $p "bin\java.exe"))) { $jdk = $p; break }
 }
@@ -46,7 +47,20 @@ if (-not $jdk) {
     $j = Get-Command java -ErrorAction SilentlyContinue
     if ($j) { $jdk = Split-Path (Split-Path $j.Source -Parent) -Parent }
 }
-if (-not $jdk) { Fail "No JDK found. Install Android Studio (it bundles one) or JDK 17+, then re-run." }
+if (-not $jdk) {
+    # Fresh machine: fetch a portable JDK (nothing is installed system-wide, no admin needed).
+    Say "No JDK found. Downloading JDK 21 (one-time, about 200 MB)..."
+    $jdkRoot = Join-Path $env:LOCALAPPDATA "P3R\jdk"
+    $jdkTmp = Join-Path $env:TEMP "p3r-jdk"
+    Remove-Item $jdkTmp -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force $jdkTmp, $jdkRoot | Out-Null
+    $jdkArch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "aarch64" } else { "x64" }
+    Invoke-WebRequest "https://api.adoptium.net/v3/binary/latest/21/ga/windows/$jdkArch/jdk/hotspot/normal/eclipse" -OutFile "$jdkTmp\jdk.zip" -UseBasicParsing
+    if (Get-Command tar -ErrorAction SilentlyContinue) { tar -xf "$jdkTmp\jdk.zip" -C $jdkRoot } else { Expand-Archive "$jdkTmp\jdk.zip" -DestinationPath $jdkRoot -Force }
+    Remove-Item $jdkTmp -Recurse -Force -ErrorAction SilentlyContinue
+    $jdk = Get-ChildItem $jdkRoot -Directory | Where-Object { Test-Path (Join-Path $_.FullName "bin\java.exe") } | Select-Object -First 1 -ExpandProperty FullName
+    if (-not $jdk) { Fail "JDK download failed. Install JDK 17+ manually and re-run." }
+}
 $env:JAVA_HOME = $jdk
 
 # ---- locate Android SDK (or choose the standard location to create it) ----
@@ -119,7 +133,9 @@ if ($need.Count) {
 # ---- hardware acceleration (warn only; the emulator reports its own error) ----
 $accel = (& $emulatorExe -accel-check 2>&1) -join " "
 if ($accel -notmatch "usable|working|KVM") {
-    Write-Warning "Hardware acceleration not detected. Enable virtualization in BIOS and turn on 'Windows Hypervisor Platform' in Windows Features, or the emulator will be very slow or fail."
+    Write-Warning ("Hardware acceleration not detected, so the emulator will be very slow or fail. Fix (one time): open PowerShell as Administrator and run " +
+        "'Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform -All', then restart Windows. " +
+        "If that errors, enable virtualization (Intel VT-x / AMD SVM) in the BIOS first.")
 }
 
 # ---- pick a healthy AVD, or create one ----
