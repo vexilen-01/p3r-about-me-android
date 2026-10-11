@@ -22,16 +22,15 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import com.example.p3rprofile.audio.MusicController
 import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RImage
 import com.example.p3rprofile.ui.components.P3RSectionTitle
 import com.example.p3rprofile.ui.theme.P3RColors
 
@@ -143,10 +142,9 @@ fun MusicScreen() {
                         contentAlignment = Alignment.Center
                     ) {
                         // Album cover fills the disc; the ring and dot on top make it look like a CD.
-                        AsyncImage(
-                            model = currentTrack.coverUrl,
+                        P3RImage(
+                            url = currentTrack.coverUrl,
                             contentDescription = currentTrack.album,
-                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                         Box(
@@ -352,10 +350,9 @@ fun MusicScreen() {
                                     .clip(CircleShape)
                                     .border(1.5.dp, P3RColors.ElectricCyan, CircleShape)
                             ) {
-                                AsyncImage(
-                                    model = artist.imgUrl,
+                                P3RImage(
+                                    url = artist.imgUrl,
                                     contentDescription = artist.name,
-                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

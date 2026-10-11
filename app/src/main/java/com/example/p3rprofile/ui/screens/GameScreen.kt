@@ -12,14 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import com.example.p3rprofile.ui.components.P3RCard
+import com.example.p3rprofile.ui.components.P3RImage
 import com.example.p3rprofile.ui.theme.P3RColors
 
 data class GameEntry(
@@ -89,10 +88,9 @@ fun GamesScreen() {
                             .background(Color.Black)
                             .border(1.dp, P3RColors.ElectricCyan, RoundedCornerShape(4.dp))
                     ) {
-                        AsyncImage(
-                            model = game.imgUrl,
+                        P3RImage(
+                            url = game.imgUrl,
                             contentDescription = game.title,
-                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                     }

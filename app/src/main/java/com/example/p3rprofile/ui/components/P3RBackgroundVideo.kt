@@ -60,13 +60,19 @@ fun P3RBackgroundVideo(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            // Shown while the video loads or when offline, so the screen stays on-theme (not plain black).
+            .background(Brush.verticalGradient(listOf(P3RColors.DeepWaterNavy, P3RColors.SiteDeepBlack)))
+    ) {
         // Video Layer
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
                     player = exoPlayer
                     useController = false
+                    setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     layoutParams = FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
