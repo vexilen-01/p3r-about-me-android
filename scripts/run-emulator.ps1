@@ -175,7 +175,14 @@ function Get-EmuSerial {
 $serial = Get-EmuSerial
 if (-not $serial) {
     Say "Booting emulator (first boot can take a few minutes)..."
-    Start-Process $emulatorExe -ArgumentList "-avd", $Avd, "-no-snapshot-save"
+    # Size the window to fit the screen (a tall phone otherwise opens half off-screen).
+    $scale = 0.4
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        $workH = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.Height
+        $scale = [math]::Round([math]::Min(1.0, [math]::Max(0.2, ($workH - 130) / 2400)), 2)
+    } catch { }
+    Start-Process $emulatorExe -ArgumentList "-avd", $Avd, "-no-snapshot-save", "-scale", "$scale"
     $deadline = (Get-Date).AddMinutes(8)
     do {
         Start-Sleep 3
