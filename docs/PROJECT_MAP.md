@@ -15,7 +15,7 @@ Source root: `app/src/main/java/com/example/p3rprofile/`
 | `ui/components/P3RBackgroundVideo.kt` | Looping muted ExoPlayer video behind everything, plus a dark gradient overlay. |
 | `ui/components/P3RNavigationBar.kt` | `enum P3RTab` (ABOUT, STATS, PROJECTS, GAMES, MUSIC, SOCIALS) and the slanted tab bar. |
 | `ui/components/P3RShapes.kt` | `AngledBannerShape` (works) and `Modifier.p3rSkew` (currently does nothing, known bug). |
-| `ui/components/PentagonStatChart.kt` | Canvas pentagon stat chart used on the STATS tab. |
+| `ui/components/PentagonStatChart.kt` | Canvas pentagon stat chart. Built but **not used on any screen yet** (the website has no such chart). Kept on purpose for later use. Does not draw its labels. |
 | `ui/screens/StatusScreen.kt` | ABOUT tab: `AboutMeScreen` and `AboutCard`. |
 | `ui/screens/PersonalityScreen.kt` | STATS tab: pentagon chart and `PersonalityMeterBar`. |
 | `ui/screens/ProjectsScreen.kt` | PROJECTS tab. Links to the website's GitHub repo. |
