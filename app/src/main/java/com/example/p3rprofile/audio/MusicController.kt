@@ -1,8 +1,12 @@
 package com.example.p3rprofile.audio
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.MediaPlayer
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,13 +67,11 @@ object MusicController {
     private val _currentTrackIndex = mutableIntStateOf(0)
     val currentTrackIndex: Int get() = _currentTrackIndex.intValue
 
+    // True only while sound is actually coming out.
     private val _isPlaying = mutableStateOf(false)
     val isPlaying: Boolean get() = _isPlaying.value
 
-    val currentTrack: Track
-        get() = playlist[currentTrackIndex]
-
-    // True while a track is being downloaded/prepared (show "LOADING" in the UI).
+    // True while a track is being downloaded/buffered (show "LOADING" in the UI).
     private val _isLoading = mutableStateOf(false)
     val isLoading: Boolean get() = _isLoading.value
 
@@ -77,156 +79,109 @@ object MusicController {
     private val _hasError = mutableStateOf(false)
     val hasError: Boolean get() = _hasError.value
 
-    private var mediaPlayer: MediaPlayer? = null
-    private var isPrepared = false
+    val currentTrack: Track
+        get() = playlist[currentTrackIndex]
 
-    // Used to pause when the app goes to the background and resume when it comes back.
-    private var appInBackground = false
+    private var player: ExoPlayer? = null
+
+    // Set when the app goes to the background while music was playing.
     private var resumeWhenForeground = false
 
-    fun initPlayer(context: Context, autoPlay: Boolean = true) {
-        if (mediaPlayer == null) {
-            prepareTrack(currentTrackIndex, autoPlay = autoPlay)
+    private val listener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            _isPlaying.value = isPlaying
         }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_BUFFERING -> _isLoading.value = true
+                Player.STATE_READY -> _isLoading.value = false
+                Player.STATE_ENDED -> nextTrack()
+                else -> Unit
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            _isLoading.value = false
+            _isPlaying.value = false
+            _hasError.value = true
+        }
+    }
+
+    /** Creates the player on first call (safe to call again, e.g. after rotation). */
+    fun initPlayer(context: Context, autoPlay: Boolean = true) {
+        if (player != null) return
+        player = ExoPlayer.Builder(context.applicationContext).build().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .setUsage(C.USAGE_MEDIA)
+                    .build(),
+                /* handleAudioFocus = */ true
+            )
+            addListener(listener)
+        }
+        prepareTrack(currentTrackIndex, autoPlay)
     }
 
     private fun prepareTrack(index: Int, autoPlay: Boolean) {
+        val exo = player ?: return
         _currentTrackIndex.intValue = index
-        isPrepared = false
         _isLoading.value = true
         _hasError.value = false
-
-        mediaPlayer?.let {
-            try {
-                if (it.isPlaying) it.stop()
-            } catch (_: Exception) {}
-            it.reset()
-            it.release()
-        }
-
-        mediaPlayer = MediaPlayer().apply {
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .build()
-            )
-            try {
-                setDataSource(playlist[index].audioUrl)
-                setOnPreparedListener { mp ->
-                    isPrepared = true
-                    _isLoading.value = false
-                    if (autoPlay) {
-                        if (appInBackground) {
-                            // Loaded while the app is hidden: wait and start when it returns.
-                            resumeWhenForeground = true
-                        } else {
-                            mp.start()
-                            _isPlaying.value = true
-                        }
-                    }
-                }
-                setOnCompletionListener {
-                    nextTrack()
-                }
-                setOnErrorListener { _, _, _ ->
-                    _isPlaying.value = false
-                    _isLoading.value = false
-                    _hasError.value = true
-                    isPrepared = false
-                    true
-                }
-                prepareAsync()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isLoading.value = false
-                _hasError.value = true
-                _isPlaying.value = false
-            }
-        }
+        exo.setMediaItem(MediaItem.fromUri(playlist[index].audioUrl))
+        exo.playWhenReady = autoPlay
+        exo.prepare()
     }
 
     fun togglePlay() {
-        val player = mediaPlayer
-        if (player == null) {
-            prepareTrack(currentTrackIndex, autoPlay = true)
-            return
-        }
-        if (isPrepared) {
-            if (player.isPlaying) {
-                player.pause()
-                _isPlaying.value = false
-            } else {
-                player.start()
-                _isPlaying.value = true
-            }
-        } else {
-            prepareTrack(currentTrackIndex, autoPlay = true)
+        val exo = player
+        if (exo == null) return
+        when {
+            // Last load failed: try the same track again.
+            _hasError.value -> prepareTrack(currentTrackIndex, autoPlay = true)
+            exo.playWhenReady -> exo.pause()
+            else -> exo.play()
         }
     }
 
     fun nextTrack() {
-        val next = (currentTrackIndex + 1) % playlist.size
-        prepareTrack(next, autoPlay = true)
+        prepareTrack((currentTrackIndex + 1) % playlist.size, autoPlay = true)
     }
 
     fun prevTrack() {
-        val prev = (currentTrackIndex - 1 + playlist.size) % playlist.size
-        prepareTrack(prev, autoPlay = true)
+        prepareTrack((currentTrackIndex - 1 + playlist.size) % playlist.size, autoPlay = true)
     }
 
     /** Current playback position in ms (0 if nothing is playing yet). */
-    fun positionMs(): Int = try {
-        if (isPrepared) mediaPlayer?.currentPosition ?: 0 else 0
-    } catch (_: Exception) {
-        0
-    }
+    fun positionMs(): Int = player?.currentPosition?.coerceAtLeast(0)?.toInt() ?: 0
 
-    /** Length of the current track in ms (0 until it has loaded). */
-    fun durationMs(): Int = try {
-        if (isPrepared) mediaPlayer?.duration?.coerceAtLeast(0) ?: 0 else 0
-    } catch (_: Exception) {
-        0
+    /** Length of the current track in ms (0 until it is known). */
+    fun durationMs(): Int {
+        val d = player?.duration ?: return 0
+        return if (d == C.TIME_UNSET) 0 else d.coerceAtLeast(0).toInt()
     }
 
     /** Call when the app is no longer visible. Pauses music and remembers to resume it. */
     fun onAppBackgrounded() {
-        appInBackground = true
-        val player = mediaPlayer ?: return
-        if (_isPlaying.value) {
-            resumeWhenForeground = true
-            try {
-                player.pause()
-            } catch (_: Exception) {}
-            _isPlaying.value = false
-        }
+        val exo = player ?: return
+        resumeWhenForeground = exo.playWhenReady
+        exo.pause()
     }
 
     /** Call when the app is visible again. Resumes music only if it was playing before. */
     fun onAppForegrounded() {
-        appInBackground = false
         if (!resumeWhenForeground) return
         resumeWhenForeground = false
-        val player = mediaPlayer ?: return
-        if (isPrepared) {
-            try {
-                player.start()
-                _isPlaying.value = true
-            } catch (_: Exception) {}
-        }
+        player?.play()
     }
 
     fun release() {
-        mediaPlayer?.let {
-            try {
-                if (it.isPlaying) it.stop()
-            } catch (_: Exception) {}
-            it.release()
-        }
-        mediaPlayer = null
-        isPrepared = false
+        player?.removeListener(listener)
+        player?.release()
+        player = null
+        resumeWhenForeground = false
         _isPlaying.value = false
         _isLoading.value = false
-        resumeWhenForeground = false
     }
 }
