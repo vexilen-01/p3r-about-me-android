@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.example.p3rprofile.audio.MusicController
 import com.example.p3rprofile.ui.components.P3RNavigationBar
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
         MusicController.initPlayer(this, autoPlay = true)
 
         setContent {
-            var currentTab by remember { mutableStateOf(P3RTab.ABOUT) }
+            var currentTab by rememberSaveable { mutableStateOf(P3RTab.ABOUT) }
 
             Box(
                 modifier = Modifier

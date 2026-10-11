@@ -135,7 +135,13 @@ fun GamesScreen() {
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = "GENRE: ${game.genre}   PLATFORM: ${game.platform}",
+                            text = "GENRE: ${game.genre}",
+                            color = Color.Gray,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Text(
+                            text = "PLATFORM: ${game.platform}",
                             color = Color.Gray,
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace

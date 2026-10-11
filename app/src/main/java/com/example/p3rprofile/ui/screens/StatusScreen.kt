@@ -70,21 +70,22 @@ fun AboutCard(
     title: String,
     subtitle: String? = null
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .background(P3RColors.SiteDarkNavy.copy(alpha = 0.95f))
             .border(width = 1.dp, color = P3RColors.OceanBlue.copy(alpha = 0.2f))
     ) {
-        // Pink/Red left accent stripe
+        // Pink/Red left accent stripe (4dp wide, full card height)
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .fillMaxHeight()
                 .width(4.dp)
                 .background(P3RColors.NeonRedPink)
         )
 
-        Column(modifier = Modifier.padding(start = 14.dp, top = 12.dp, bottom = 12.dp, end = 12.dp)) {
+        Column(modifier = Modifier.padding(start = 10.dp, top = 12.dp, bottom = 12.dp, end = 12.dp)) {
             Text(
                 text = category,
                 color = P3RColors.ElectricCyan,
