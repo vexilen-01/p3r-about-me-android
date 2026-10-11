@@ -60,6 +60,8 @@ The first time the user asks you to add, change, fix or run anything in a sessio
    - One line for anything the user must do or watch out for (for example "Say 'yes' next time and I'll set up the emulator"). Omit it if there is nothing.
    - End with: "Say 'details' if you want more." Only go deeper when asked.
 6. Then sync: `git pull --rebase origin main`. If the user has uncommitted work, commit it first. Never throw it away.
+   - **Only `.idea/` files changed?** (Android Studio edits them by itself, and the folder is no longer tracked.) Do not ask. Run `git stash push -- .idea`, then pull. Leave the stash alone; do not pop it. Mention it in at most one short line, or not at all.
+   - Anything else changed? Commit it first, as above.
 7. Read the **Collaborator Activity Log** in section 5. If anything is marked `PENDING FOR YOU`, add one line such as "2 things are waiting for you (say 'pending' to see them)". Do not list them unless asked.
 8. If `.agent-local` has no `test_target` yet, add the one-line emulator offer from the Quick Start section at the top, even when nothing new was pushed.
 9. Then carry on with what the user asked.
