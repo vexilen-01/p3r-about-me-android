@@ -73,8 +73,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        MusicController.onAppForegrounded()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Pause when the user leaves the app, but not for a screen rotation.
+        if (!isChangingConfigurations) MusicController.onAppBackgrounded()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        MusicController.release()
+        // Rotation also destroys the activity. Only stop the music when the app is really closing.
+        if (isFinishing) MusicController.release()
     }
 }

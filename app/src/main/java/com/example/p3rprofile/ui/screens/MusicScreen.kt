@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import com.example.p3rprofile.audio.MusicController
 import com.example.p3rprofile.ui.components.p3rSkew
 import com.example.p3rprofile.ui.theme.P3RColors
@@ -41,6 +42,19 @@ fun MusicScreen() {
     val isPlaying = MusicController.isPlaying
     val trackIndex = MusicController.currentTrackIndex
     val totalTracks = MusicController.playlist.size
+    val isLoading = MusicController.isLoading
+    val hasError = MusicController.hasError
+
+    // Poll the player twice a second to move the progress bar.
+    var positionMs by remember { mutableIntStateOf(0) }
+    var durationMs by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            positionMs = MusicController.positionMs()
+            durationMs = MusicController.durationMs()
+            delay(500)
+        }
+    }
 
     val artists = listOf(
         Artist("Joji", "https://persona-3-reload-about-me-website-beta.vercel.app/joji.jpg"),
@@ -133,6 +147,13 @@ fun MusicScreen() {
                             .border(2.dp, Color(0xFF94A3B8), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
+                        // Album cover fills the disc; the ring and dot on top make it look like a CD.
+                        AsyncImage(
+                            model = currentTrack.coverUrl,
+                            contentDescription = currentTrack.album,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                         Box(
                             modifier = Modifier
                                 .size(14.dp)
@@ -203,11 +224,34 @@ fun MusicScreen() {
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
-                                    text = if (isPlaying) "❚❚ PAUSE" else "▶ PLAY",
+                                    text = when {
+                                        hasError -> "OFFLINE ▶"
+                                        isLoading -> "LOADING…"
+                                        isPlaying -> "❚❚ PAUSE"
+                                        else -> "▶ PLAY"
+                                    },
                                     color = P3RColors.ElectricCyan,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Black,
                                     fontFamily = FontFamily.Monospace
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(5.dp))
+                            // Track progress bar
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(3.dp)
+                                    .background(P3RColors.ElectricCyan.copy(alpha = 0.2f))
+                            ) {
+                                val progress = if (durationMs > 0) {
+                                    (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
+                                } else 0f
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(fraction = progress)
+                                        .background(P3RColors.ElectricCyan)
                                 )
                             }
                         }

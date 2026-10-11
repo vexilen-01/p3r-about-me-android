@@ -69,8 +69,20 @@ object MusicController {
     val currentTrack: Track
         get() = playlist[currentTrackIndex]
 
+    // True while a track is being downloaded/prepared (show "LOADING" in the UI).
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading.value
+
+    // True when the last track failed to load (usually no internet).
+    private val _hasError = mutableStateOf(false)
+    val hasError: Boolean get() = _hasError.value
+
     private var mediaPlayer: MediaPlayer? = null
     private var isPrepared = false
+
+    // Used to pause when the app goes to the background and resume when it comes back.
+    private var appInBackground = false
+    private var resumeWhenForeground = false
 
     fun initPlayer(context: Context, autoPlay: Boolean = true) {
         if (mediaPlayer == null) {
@@ -81,6 +93,8 @@ object MusicController {
     private fun prepareTrack(index: Int, autoPlay: Boolean) {
         _currentTrackIndex.intValue = index
         isPrepared = false
+        _isLoading.value = true
+        _hasError.value = false
 
         mediaPlayer?.let {
             try {
@@ -101,9 +115,15 @@ object MusicController {
                 setDataSource(playlist[index].audioUrl)
                 setOnPreparedListener { mp ->
                     isPrepared = true
+                    _isLoading.value = false
                     if (autoPlay) {
-                        mp.start()
-                        _isPlaying.value = true
+                        if (appInBackground) {
+                            // Loaded while the app is hidden: wait and start when it returns.
+                            resumeWhenForeground = true
+                        } else {
+                            mp.start()
+                            _isPlaying.value = true
+                        }
                     }
                 }
                 setOnCompletionListener {
@@ -111,18 +131,27 @@ object MusicController {
                 }
                 setOnErrorListener { _, _, _ ->
                     _isPlaying.value = false
+                    _isLoading.value = false
+                    _hasError.value = true
                     isPrepared = false
                     true
                 }
                 prepareAsync()
             } catch (e: Exception) {
                 e.printStackTrace()
+                _isLoading.value = false
+                _hasError.value = true
+                _isPlaying.value = false
             }
         }
     }
 
     fun togglePlay() {
-        val player = mediaPlayer ?: return
+        val player = mediaPlayer
+        if (player == null) {
+            prepareTrack(currentTrackIndex, autoPlay = true)
+            return
+        }
         if (isPrepared) {
             if (player.isPlaying) {
                 player.pause()
@@ -146,6 +175,47 @@ object MusicController {
         prepareTrack(prev, autoPlay = true)
     }
 
+    /** Current playback position in ms (0 if nothing is playing yet). */
+    fun positionMs(): Int = try {
+        if (isPrepared) mediaPlayer?.currentPosition ?: 0 else 0
+    } catch (_: Exception) {
+        0
+    }
+
+    /** Length of the current track in ms (0 until it has loaded). */
+    fun durationMs(): Int = try {
+        if (isPrepared) mediaPlayer?.duration?.coerceAtLeast(0) ?: 0 else 0
+    } catch (_: Exception) {
+        0
+    }
+
+    /** Call when the app is no longer visible. Pauses music and remembers to resume it. */
+    fun onAppBackgrounded() {
+        appInBackground = true
+        val player = mediaPlayer ?: return
+        if (_isPlaying.value) {
+            resumeWhenForeground = true
+            try {
+                player.pause()
+            } catch (_: Exception) {}
+            _isPlaying.value = false
+        }
+    }
+
+    /** Call when the app is visible again. Resumes music only if it was playing before. */
+    fun onAppForegrounded() {
+        appInBackground = false
+        if (!resumeWhenForeground) return
+        resumeWhenForeground = false
+        val player = mediaPlayer ?: return
+        if (isPrepared) {
+            try {
+                player.start()
+                _isPlaying.value = true
+            } catch (_: Exception) {}
+        }
+    }
+
     fun release() {
         mediaPlayer?.let {
             try {
@@ -156,5 +226,7 @@ object MusicController {
         mediaPlayer = null
         isPrepared = false
         _isPlaying.value = false
+        _isLoading.value = false
+        resumeWhenForeground = false
     }
 }
