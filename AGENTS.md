@@ -43,6 +43,7 @@ Additional safety rules:
   - Colors: Midnight Black (`#010816`), Electric Cyan (`#00E5FF`), Neon Red/Pink Ribbon (`#FF0055` to `#FF2A00`)
   - Typography: Slanted/skewed transforms (`-8°` to `-12°`), sharp high-contrast drop shadows.
 - **Repository**: Public GitHub repository under `@vexilen-01`
+- **Project map**: read `docs/PROJECT_MAP.md` once per session before editing code. It lists every file and the style rules, so do not scan the whole source tree. If you add, remove or rename a file or tab, update that map in the same commit.
 - **Root Directory**: wherever the repo is cloned on the current machine. This differs per developer, so do not hardcode a path. The old value `C:\Users\HP\AndroidStudioProjects\P3RProfile` is only one developer's location.
 
 ### 3. Collaborator Sync Briefing (run at the start of every session and before every new task)
