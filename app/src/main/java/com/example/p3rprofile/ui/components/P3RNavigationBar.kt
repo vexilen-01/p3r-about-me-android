@@ -88,7 +88,6 @@ fun P3RNavigationBar(
                             scaleX = scale
                             scaleY = scale
                         }
-                        .p3rSkew(-10f)
                         .then(
                             if (isSelected) {
                                 Modifier
@@ -112,7 +111,9 @@ fun P3RNavigationBar(
                         ) { onTabSelected(tab) }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
+                    // The box edges are already slanted by AngledBannerShape; slant only the label.
                     Text(
+                        modifier = Modifier.p3rSkew(-10f),
                         text = tab.display,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Black,

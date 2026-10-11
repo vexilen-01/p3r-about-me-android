@@ -5,16 +5,27 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.tan
 
-fun Modifier.p3rSkew(angleDegrees: Float = -8f): Modifier = this.graphicsLayer {
+/**
+ * Slants everything drawn BELOW this modifier in the chain (text, backgrounds, borders).
+ * A negative angle leans the top to the right, like P3R's italic HUD text.
+ * Only the drawing is skewed; layout size and touch area stay rectangular.
+ */
+fun Modifier.p3rSkew(angleDegrees: Float = -8f): Modifier = this.drawWithContent {
     val shearX = tan(Math.toRadians(angleDegrees.toDouble())).toFloat()
-    val matrix = androidx.compose.ui.graphics.Matrix()
-    matrix.values[androidx.compose.ui.graphics.Matrix.SkewX] = -shearX
-    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0.5f)
+    val matrix = Matrix()
+    matrix.values[Matrix.SkewX] = shearX
+    // Skew around the vertical centre so the text does not drift sideways.
+    matrix.values[Matrix.TranslateX] = -shearX * (size.height / 2f)
+    withTransform({ transform(matrix) }) {
+        this@drawWithContent.drawContent()
+    }
 }
 
 class AngledBannerShape(
